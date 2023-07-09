@@ -1,110 +1,108 @@
 from list_manager import ListElement
 import console_menu
-from color import Color
+import color
 import json
 import os
 
 SAVE_PATH = "save.json"
+MENU_CURSOR_COLOR = "blue"
 
 MAIN_MENU = ("Create a new list", "Select an existing list", "Save and quit")
-ACTION_MENU = ("Add a new element", "Remove an element", "Empty the list", "Quit")
+LIST_OPERATION_MENU = ("Add a new element", "Remove an element", "Empty the list", "Delete the list", "Return")
 
 TERMINAL_WIDTH = os.get_terminal_size().columns
-
 lists: list[ListElement] = []
 
-if(os.path.exists(SAVE_PATH)):
-    with open("save.json", "r") as file :
-        json_lists = json.load(file)
+if(os.path.exists(SAVE_PATH) and os.path.getsize(SAVE_PATH) > 0):
+    with open(SAVE_PATH, "r", encoding="utf8") as file:
+        saved_lists: list = json.load(file)
 
-        for json_list in json_lists:
-            lists.append(ListElement(json_list["name"], json_list["content"]))
+        for saved_list in saved_lists:
+            new_list_element = ListElement(saved_list["name"], saved_list["content"])
+            lists.append(new_list_element)
 
-choice: str = None
+while(True):
+    main_choice = console_menu.console_menu("Welcome to List Manager", MAIN_MENU, MENU_CURSOR_COLOR)
 
-while(choice != MAIN_MENU[2]):
-    choice = console_menu.console_menu("Welcome to List Manager", MAIN_MENU, "blue")
-
-    if(choice == MAIN_MENU[0]):
+    if(main_choice == MAIN_MENU[0]):
         while(True):
             new_list_name = input("\n Enter the name of the list to create : ")
             new_list_name = new_list_name.strip()
 
             if(len(new_list_name) < 3):
-                print("\n " + Color.red("List name cannot be shorter than 3 characters"))
+                os.system("cls" if os.name == "nt" else "clear")
+                print("\n " + color.red("List name cannot be shorter than 3 characters"))
+            elif(len(new_list_name) > 20):
+                os.system("cls" if os.name == "nt" else "clear")
+                print("\n " + color.red("List name cannot be longer than 20 characters"))
             elif(not new_list_name.replace(" ","").isalnum()):
-                print("\n " + Color.red("List name cannot contain special characters"))
+                os.system("cls" if os.name == "nt" else "clear")
+                print("\n " + color.red("List name cannot contain special characters"))
             elif(new_list_name in [list_element.name for list_element in lists]):
-                print(("\n " + Color.red(f"List name '{new_list_name}' already exists")))
+                os.system("cls" if os.name == "nt" else "clear")
+                print(("\n " + color.red(f"List '{new_list_name}' already exists")))
             else:
                 break
 
-        list_element = ListElement(new_list_name)
-        lists.append(list_element)
+        new_list_element = ListElement(new_list_name)
+        lists.append(new_list_element)
 
-        print("\n " + Color.magenta(f"List '{new_list_name}' has been successfully created"))
-        input(" Press enter to contiune...")
+        print("\n " + color.magenta(f"List '{new_list_name}' has been successfully created \n"))
+        input(" Press enter to continue...")
 
-    elif(choice == MAIN_MENU[1]):
-        for i, list_element in enumerate(lists):
-            print(f"{i+1}. {list_element.name}")
+    elif(main_choice == MAIN_MENU[1]):
+        if(len(lists) > 0):
+            manage_list_options = [list_element.name for list_element in lists] + ["Return"]
+            selected_list = console_menu.console_menu("Select a list to manage", manage_list_options, MENU_CURSOR_COLOR)
 
-        list_choice = input("Choose a list : ")
-        while(not list_choice.isdecimal() and list_choice not in list(range(len(lists)))):
-            print("Please choose a correct option \n")
-            list_choice = input("Choose a list : ")
-        a = input("ok")
+            if(selected_list == manage_list_options[-1]):
+                continue
+            else:
+                for l in lists:
+                    if(l.name == selected_list):
+                        selected_list = l
+                        break
 
-with open("save.json", "w") as file:
-    lists = vars(lists)
-    json.dump(lists, file, indent=4)
-# print("\nChoisissez parmi les 5 options suivantes: \n")
-#     print(" \n")
+                list_content = [" "*11 + color.magenta(f"- {element}") for element in l.content]
+                longer_element = max(list_content, key=len)
 
-#     if(user_choice == "1"):
-#         ajout = input("\nEntrez l'élement à ajouter à liste de course : ")
-#         liste_de_course.append(ajout)
-#         print(f"\n\x1b[95mL'élément \"{ajout}\" a bien été ajouté à la liste\x1b[0m")
-#     elif(user_choice == "2"):
-#         suppr = input("\nEntrez l'élement à supprimer de la liste de course : ")
-#         if suppr in liste_de_course:
-#             liste_de_course.remove(suppr)
-#             print(f"\n\x1b[95mL'élément \"{suppr}\" a bien été supprimé de la liste de course\x1b[0m")
-#         else:
-#             print("\n\x1b[91m\x1b[1m⚠ ERREUR\x1b[0m\x1b[91m\nL'élement saisi n'est pas dans la liste et ne peut donc être supprimé\x1b[0m")
-#     elif user_choice == "3":
-#         if len(liste_de_course) == 0:
-#             print("\n\x1b[95mLa liste est vide, choisissez l'option 1 pour y ajouter des éléments\x1b[0m")
-#         else:
-#             print("\n\x1b[95m\x1b[4mContenu de la liste:\x1b[0m")
-#             for i, element in enumerate(liste_de_course):
-#                 print(f"\x1b[95m{i+1}. {element}\x1b[0m")
-#     elif user_choice == "4":
-#         confirm = input("\n\x1b[91mEtes vous vraiment sûr de vouloir écraser votre liste de course ? (oui/non)\x1b[0m ")
-#         while not (confirm == "oui" or confirm == "Oui" or confirm == "Non" or confirm == "non" or confirm == "nn"):
-#             print("\n \x1b[91m\x1b[1m⚠ ERREUR\x1b[0m\x1b[91m\nOption saisie invalide \x1b[0m")
-#             confirm = input("\nVeuillez répondre par oui ou par non : ")
-#         if confirm == "Oui" or confirm == "oui":
-#             if not len(liste_de_course) == 0:
-#                 liste_de_course.clear()
-#                 print("\n\x1b[95mLa liste a été vidée de son contenu avec succès\x1b[0m")
-#             else:
-#                 print("\n\x1b[95mLa liste est déjà vide\x1b[0m")
-#         elif confirm == "Non" or confirm == "non" or confirm == "nn":
-#             # continue
-#     elif user_choice == "5":
-#         confirm = input("\n\x1b[91mVous êtes sur le point de quitter, voulez vous sauvegarder ? (oui/non/annuler)\x1b[0m ")
-#         while not (confirm == "oui" or confirm == "Oui" or confirm == "Non" or confirm == "non" or confirm == "nn" or confirm == "annuler" or confirm == "Annuler"):
-#             print("\n\x1b[91m\x1b[1m⚠ ERREUR\x1b[0m\x1b[91m\nOption saisie invalide\x1b[0m")
-#             confirm = input("\nVeuillez répondre par oui ou par non : ")
-#         if confirm == "Oui" or confirm == "oui":
-#             with open(save_path,"w") as f:
-#                 json.dump(liste_de_course,f, indent=2)
-#             print("\n\x1b[95mVotre liste de course a bien été sauvegardé\x1b[0m")
-#             print("\nA bientôt ! 😜 ")
-#             break
-#         elif confirm == "Non" or confirm == "non" or confirm == "nn":
-#             print("\nA bientôt ! 😜 ")
-#             break
-#         elif confirm == "annuler" or confirm == "Annuler":
-#             continue
+                for i in range (len(list_content)):
+                    if(len(list_content[i]) < len(longer_element)):
+                        list_content[i] = list_content[i].ljust(len(longer_element))
+
+                title = [f"{l.name} content :\n"] + list_content
+                choice = console_menu.console_menu(title, LIST_OPERATION_MENU, MENU_CURSOR_COLOR)
+
+                if(choice == LIST_OPERATION_MENU[0]):
+                    pass
+                elif(choice == LIST_OPERATION_MENU[1]):
+                    element_to_rm = console_menu.console_menu("Choose an element to remove", [element for element in selected_list.content] + ["Cancel"], MENU_CURSOR_COLOR)
+
+                    if(element_to_rm != "Cancel"):
+                        sure_to_rm = console_menu.console_menu(f"Are you sure to remove '{element_to_rm}' from '{selected_list.name}' ?", ("Yes", "No"), "red")
+                        if(sure_to_rm == "Yes"):
+                            selected_list.remove(element_to_rm)
+                if(choice == LIST_OPERATION_MENU[2]):
+                    sure_to_clear = console_menu.console_menu(f"Are you sure to clear list '{selected_list.name}' ?", ("Yes", "No"), "red")
+
+                    if(sure_to_clear == "Yes"):
+                        selected_list.empty()
+                elif(choice == LIST_OPERATION_MENU[3]):
+                    sure_to_clear = console_menu.console_menu(f"Are you sure to delete list '{selected_list.name}' ?", ("Yes", "No"), "red")
+
+                    if(sure_to_clear == "Yes"):
+                        lists.remove(selected_list)
+
+        else:
+            print("\n " + color.red("You haven't created any list yet \n"))
+            input(" Press enter to continue...")
+
+    elif(main_choice == MAIN_MENU[2]):
+        list_to_save: list = []
+
+        for list_element in lists:
+            list_to_save.append({"name" : list_element.name, "content" : list_element.content})
+        with open(SAVE_PATH, "w") as file:
+            json.dump(list_to_save, file, indent=4)
+
+        exit()

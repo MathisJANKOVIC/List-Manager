@@ -10,9 +10,8 @@ class ListElement:
 
     def add(self, element):
         self.content.append(element)
-        
 
-    def delete(self, element):
+    def remove(self, element):
         if(element in self.content):
             self.content.remove(element)
             print(f"\n\x1b[95m\"{element}\" has been successfully deleted from {self.name} \x1b[0m \n")
