@@ -1,4 +1,5 @@
 import os
+import termcolor
 
 class Keys:
     ARROW_UP = b"H"
@@ -15,7 +16,7 @@ ANSI_BG_COLORS = {
     "white": "\033[47m"
 }
 
-def console_menu(title: str | tuple | list, options: tuple | list, cursor_color: str) -> str :
+def console_menu(title: str | list | tuple, options: list | tuple, cursor_color: str) -> str :
     """Creates a console GUI menu with a cursor and returns the selected option. Use arrow keys to move the cursor.
     Cursor colors available : red, green, yellow, blue, magenta, cyan. You can use a custom color by specifing ANSI color code using octal escape code '\\033'"""
 
@@ -39,10 +40,19 @@ def console_menu(title: str | tuple | list, options: tuple | list, cursor_color:
         title = [title]
 
     while(key != Keys.ENTER):
+        # print(title)
         print("\n"*(VERTICAL_SPACING - len(title) - 2))
         for line in title:
-            print(" " + line.center(TERMINAL_WIDTH - 1))
-        print("\n")
+
+            if(line.startswith("-")):
+                termcolor.cprint(" " + line.center(TERMINAL_WIDTH - 1), "light_magenta")
+            else:
+                print(" " + line.center(TERMINAL_WIDTH - 1))
+
+        if(len(title) > 1):
+            print()
+        else:
+            print("\n")
 
         for line, option in enumerate(options):
             if(line + VERTICAL_SPACING == cursor_height):
@@ -77,5 +87,5 @@ def console_menu(title: str | tuple | list, options: tuple | list, cursor_color:
 
 if(__name__ == "__main__"):
     OPTIONS = ["Option 1", "Option 2", "Option 3", "Quit"]
-    choice = console_menu(["Amazing", "mdrrrr"], OPTIONS, "red")
+    choice = console_menu("Amazing Console Menu", OPTIONS, "red")
     print(choice)

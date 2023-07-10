@@ -1,7 +1,9 @@
 from list_manager import ListElement
 import console_menu
-import color
+import termcolor
+
 import json
+import sys
 import os
 
 SAVE_PATH = "save.json"
@@ -25,29 +27,39 @@ while(True):
     main_choice = console_menu.console_menu("Welcome to List Manager", MAIN_MENU, MENU_CURSOR_COLOR)
 
     if(main_choice == MAIN_MENU[0]):
+        sys.stdout.write("\n")
         while(True):
-            new_list_name = input("\n Enter the name of the list to create : ")
+            new_list_name = input(" Enter the name of the list to create : ")
             new_list_name = new_list_name.strip()
+            sys.stdout.write("\n")
 
             if(len(new_list_name) < 3):
-                os.system("cls" if os.name == "nt" else "clear")
-                print("\n " + color.red("List name cannot be shorter than 3 characters"))
+                sys.stdout.write("\033[K")
+                sys.stdout.write(termcolor.colored(" List name cannot be shorter than 3 characters", "red"))
+                sys.stdout.write("\033[F" * 2)
+                sys.stdout.write("\033[K")
             elif(len(new_list_name) > 20):
-                os.system("cls" if os.name == "nt" else "clear")
-                print("\n " + color.red("List name cannot be longer than 20 characters"))
+                sys.stdout.write("\033[K")
+                sys.stdout.write(termcolor.colored(" List name cannot be longer than 20 characters", "red"))
+                sys.stdout.write("\033[F" * 2)
+                sys.stdout.write("\033[K")
             elif(not new_list_name.replace(" ","").isalnum()):
-                os.system("cls" if os.name == "nt" else "clear")
-                print("\n " + color.red("List name cannot contain special characters"))
+                sys.stdout.write("\033[K")
+                sys.stdout.write(termcolor.colored(" List name cannot contain special characters", "red"))
+                sys.stdout.write("\033[F" * 2)
+                sys.stdout.write("\033[K")
             elif(new_list_name in [list_element.name for list_element in lists]):
-                os.system("cls" if os.name == "nt" else "clear")
-                print(("\n " + color.red(f"List '{new_list_name}' already exists")))
+                sys.stdout.write("\033[K")
+                sys.stdout.write((termcolor.colored(f" List '{new_list_name}' already exists", "red")))
+                sys.stdout.write("\033[F" * 2)
+                sys.stdout.write("\033[K")
             else:
                 break
 
         new_list_element = ListElement(new_list_name)
         lists.append(new_list_element)
 
-        print("\n " + color.magenta(f"List '{new_list_name}' has been successfully created \n"))
+        print("\n " + termcolor.colored(f"List '{new_list_name}' has been successfully created \n", "light_magenta"))
         input(" Press enter to continue...")
 
     elif(main_choice == MAIN_MENU[1]):
@@ -63,14 +75,18 @@ while(True):
                         selected_list = l
                         break
 
-                list_content = [" "*11 + color.magenta(f"- {element}") for element in l.content]
-                longer_element = max(list_content, key=len)
+                title = [f"{l.name} content :\n"]
+                list_content = [f"- {element}" for element in l.content]
+                if(len(list_content) > 0):
+                    longer_element = max(list_content, key=len)
 
-                for i in range (len(list_content)):
-                    if(len(list_content[i]) < len(longer_element)):
-                        list_content[i] = list_content[i].ljust(len(longer_element))
+                    for i in range (len(list_content)):
+                        if(len(list_content[i]) < len(longer_element)):
+                            list_content[i] = list_content[i].ljust(len(longer_element))
 
-                title = [f"{l.name} content :\n"] + list_content
+                    title = [f"{l.name} content :\n"] + list_content
+                else:
+                    title = selected_list.name + "\033[41m(empty)\033[0m"
                 choice = console_menu.console_menu(title, LIST_OPERATION_MENU, MENU_CURSOR_COLOR)
 
                 if(choice == LIST_OPERATION_MENU[0]):
@@ -94,7 +110,7 @@ while(True):
                         lists.remove(selected_list)
 
         else:
-            print("\n " + color.red("You haven't created any list yet \n"))
+            print("\n " + termcolor.colored("You haven't created any list yet \n", "red"))
             input(" Press enter to continue...")
 
     elif(main_choice == MAIN_MENU[2]):
@@ -102,7 +118,7 @@ while(True):
 
         for list_element in lists:
             list_to_save.append({"name" : list_element.name, "content" : list_element.content})
-        with open(SAVE_PATH, "w") as file:
+        with open(SAVE_PATH, "w", encoding="utf8") as file:
             json.dump(list_to_save, file, indent=4)
 
-        exit()
+        sys.exit()
