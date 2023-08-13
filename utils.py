@@ -20,7 +20,7 @@ ANSI_BG_COLORS = {
     "white": "\033[47m"
 }
 
-def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[str, ...], cursor_color: str, initial_cursor_position: str | int = 0, output_format: type = str) -> str | int :
+def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[str, ...], cursor_color: str, initial_cursor_position: str | int = 0, output_format: type = str, color_options: str | None = None) -> str | int :
     """Creates a graphical user interface menu in console, allowing users to navigate through the menu using arrow keys and select an option with enter key. Clears console once an option is selected.
 
     Args:
@@ -80,10 +80,16 @@ def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[st
     key = None
     while(key != Keys.SELECT):
         for line, option in enumerate(options):
-            if(line + VERTICAL_SPACING == cursor_height):
-                print(" " + cursor_color + option.center(TERMINAL_WIDTH - 1) + '\033[0m')
+            if(color_options == None or option == options[-1]):
+                if(line + VERTICAL_SPACING == cursor_height):
+                    print(" " + cursor_color + option.center(TERMINAL_WIDTH - 1) + '\033[0m')
+                else:
+                    print(" " + option.center(TERMINAL_WIDTH - 1))
             else:
-                print(" " + option.center(TERMINAL_WIDTH - 1))
+                if(line + VERTICAL_SPACING == cursor_height):
+                    termcolor.cprint(" " + cursor_color + option.center(TERMINAL_WIDTH - 1) + '\033[0m', color_options)
+                else:
+                    termcolor.cprint(" " + option.center(TERMINAL_WIDTH - 1), color_options)
 
         key = msvcrt.getwch()
 

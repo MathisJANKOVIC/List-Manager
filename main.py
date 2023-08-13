@@ -1,6 +1,6 @@
 from ListElement import ListElement
-import list_manager
 import list_creation
+import list_manager
 import utils
 
 import json
@@ -31,7 +31,7 @@ while(True):
         else:
             print("\n\033[95m You haven't created any list yet \033[0m\n")
             input(" Press enter to continue...")
-    elif(choice == MAIN_MENU[2]):
+    else:
         lists_to_save: list = []
 
         for list_element in lists:
