@@ -1,12 +1,11 @@
-from ListElement import ListElement
 import utils
 import sys
 
-OPERATION_MENU = ("Add a new element", "Remove an element", "Empty the list", "Delete the list", "Exit")
-
+OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Empty the list", "Delete the list", "Exit")
+CONFIRMATION_OPTIONS = ("Ok", "Cancel")
 def main(lists):
     list_manager_options = [list_element.name for list_element in lists] + ["Exit"]
-    selected_list_name = utils.menu("Select a list to manage", list_manager_options, utils.MENU_CURSOR_COLOR, color_options="light_cyan")
+    selected_list_name = utils.menu("Select a list to manage", list_manager_options, utils.MENU_CURSOR_COLOR)
 
     if(selected_list_name != "Exit"):
         for list in lists:
@@ -15,21 +14,24 @@ def main(lists):
                 break
         choice = None
 
-        while(choice != OPERATION_MENU[-1]):
+        while(choice != OPERATION_OPTIONS[-1]):
             list_content = [f"- {element}" for element in list.content]
 
             if(len(list_content) > 0):
                 longer_element = max(list_content, key=len)
 
                 for i, element in enumerate(list_content):
-                    list_content[i] = element.ljust(len(longer_element))
+                    if(len(longer_element) > 10):
+                        list_content[i] = element.ljust(len(longer_element)) # a changer
+                    else:
+                        list_content[i] = element.ljust(10)
 
                 title_menu = [f"{list.name} content :\n"] + list_content
             else:
                 title_menu = selected_list.name + " (empty)"
-            choice = utils.menu(title_menu, OPERATION_MENU, utils.MENU_CURSOR_COLOR)
+            choice = utils.menu(title_menu, OPERATION_OPTIONS, utils.MENU_CURSOR_COLOR, color_options="light_yellow")
 
-            if(choice == OPERATION_MENU[0]):
+            if(choice == OPERATION_OPTIONS[0]):
                 sys.stdout.write("\n")
 
                 while(True):
@@ -58,34 +60,34 @@ def main(lists):
 
                 selected_list.add(new_element)
 
-            elif(choice == OPERATION_MENU[1]):
+            elif(choice == OPERATION_OPTIONS[1]):
                 remove_options = [element for element in selected_list.content] + ["Cancel"]
                 if(len(remove_options) > 1):
                     element_to_rm = utils.menu("Choose an element to remove", remove_options, utils.MENU_CURSOR_COLOR, color_options="light_magenta")
 
                     if(element_to_rm != remove_options[-1]):
-                        sure_to_rm = utils.menu(f"You are about to remove '{element_to_rm}' from '{selected_list.name}'", ("Ok", "Cancel"), "red", initial_cursor_position=-1)
+                        sure_to_rm = utils.menu(f"You are about to remove '{element_to_rm}' from '{selected_list.name}'", CONFIRMATION_OPTIONS, "red", initial_cursor_position=-1)
 
-                        if(sure_to_rm == "Ok"):
+                        if(sure_to_rm == CONFIRMATION_OPTIONS[0]):
                             selected_list.remove(element_to_rm)
                 else:
-                    print("\n\033[95m The list is empty so there is no element to remove \033[0m\n")
+                    print("\n\033[95m You cannot remove an element, the list is empty \033[0m\n")
                     input(" Press enter to continue...")
 
-            elif(choice == OPERATION_MENU[2]):
+            elif(choice == OPERATION_OPTIONS[2]):
                 if(len(selected_list.content) > 0):
-                    sure_to_clear = utils.menu(f"You are about to clear list '{selected_list.name}'", ("Ok", "Cancel"), "red", initial_cursor_position=-1)
+                    sure_to_clear = utils.menu(f"You are about to clear list '{selected_list.name}'", CONFIRMATION_OPTIONS, "red", initial_cursor_position=-1)
 
-                    if(sure_to_clear == "Ok"):
+                    if(sure_to_clear == CONFIRMATION_OPTIONS[0]):
                         selected_list.empty()
                 else:
                     print("\n\033[95m The list is already empty \033[0m\n")
                     input(" Press enter to continue...")
 
-            elif(choice == OPERATION_MENU[3]):
-                sure_to_clear = utils.menu(f"You are about to delete list '{selected_list.name}'", ("Ok", "Cancel"), "red", initial_cursor_position=-1)
+            elif(choice == OPERATION_OPTIONS[3]):
+                sure_to_clear = utils.menu(f"You are about to delete list '{selected_list.name}'", CONFIRMATION_OPTIONS, "red", initial_cursor_position=-1)
 
-                if(sure_to_clear == "Ok"):
+                if(sure_to_clear == CONFIRMATION_OPTIONS[0]):
                     lists.remove(selected_list)
                     main(lists)
             else:

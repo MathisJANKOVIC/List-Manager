@@ -26,11 +26,12 @@ def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[st
     Args:
         - `title`: main title of the menu, can be displayed on multiple lines if a list or a tuple is passed
         - `options`: list of choices or actions that can be selected
-        - `cursor_color`: color of the cursor, available colors are `red`, `green`, `yellow`, `blue`, `magenta`, `cyan` and `white`,
+        - `cursor_color`: color of the cursor, available colors are the same as colors from termcolor module,
            use custom color by specifying ANSI color code using escape code `\\033`
         - `initial_cursor_position` (optional): index of element or element in `options` where the initial cursor position is set (default position is first element)
         - `output_format` (optionnal): output type of the function, default is `str`, which returns the selected element from `options`,
            pass `int` to get the index of the selected element
+        - `color_options` (optionnal): color of the options, available colors are the same as `cursor_color`, last option is not colored
 
     Returns:
        - `selected_option`: element from `options` selected by the user if output_format is `str` else returns the index of the element"""
@@ -71,7 +72,7 @@ def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[st
     else:
         print('\n'*(VERTICAL_SPACING - len(title) - 1))
         for line in title:
-            if(line.startswith("-")):
+            if(line.startswith("-")): # if the option is an element of a list
                 termcolor.cprint(" " + line.center(TERMINAL_WIDTH - 1), "light_magenta")
             else:
                 print(" " + line.center(TERMINAL_WIDTH - 1))
@@ -80,7 +81,7 @@ def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[st
     key = None
     while(key != Keys.SELECT):
         for line, option in enumerate(options):
-            if(color_options == None or option == options[-1]):
+            if(color_options == None or option == "Exit" or option == "Cancel"):
                 if(line + VERTICAL_SPACING == cursor_height):
                     print(" " + cursor_color + option.center(TERMINAL_WIDTH - 1) + '\033[0m')
                 else:

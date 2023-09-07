@@ -6,19 +6,14 @@
             "500kg de steak hac",
             "1kg de riz",
             "Sachet de basilique",
-            "4 Pommes"
+            "4 Pommes",
+            "3 Bananes"
         ]
     },
     {
         "name": "Todo",
-        "content": []
-    },
-    {
-        "name": "final-test",
-        "content": []
-    },
-    {
-        "name": "fail",
-        "content": []
+        "content": [
+            "dddd"
+        ]
     }
 ]

@@ -25,8 +25,8 @@ def main(lists):
         else:
             break
 
-        sys.stdout.write("\033[F" * 2)
-        sys.stdout.write("\033[K")
+        sys.stdout.write("\033[F" * 2) 
+        sys.stdout.write("\033[K") # deletes user input
 
     new_list_element = ListElement(new_list_name)
     lists.append(new_list_element)

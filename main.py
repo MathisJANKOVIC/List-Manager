@@ -1,5 +1,5 @@
 from ListElement import ListElement
-import list_creation
+import create_list
 import list_manager
 import utils
 
@@ -24,7 +24,7 @@ while(True):
     choice = utils.menu("Welcome to List Manager", MAIN_MENU, utils.MENU_CURSOR_COLOR)
 
     if(choice == MAIN_MENU[0]):
-        list_creation.main(lists)
+        create_list.main(lists)
     elif(choice == MAIN_MENU[1]):
         if(len(lists) > 0):
             list_manager.main(lists)
