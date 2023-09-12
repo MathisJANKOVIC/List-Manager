@@ -4,6 +4,7 @@ import sys
 import os
 
 MENU_CURSOR_COLOR = "blue"
+EXIT_OPTION = "Return"
 
 class Keys:
     UP = 'H' # Arrow up
@@ -20,18 +21,18 @@ ANSI_BG_COLORS = {
     "white": "\033[47m"
 }
 
-def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[str, ...], cursor_color: str, initial_cursor_position: str | int = 0, output_format: type = str, color_options: str | None = None) -> str | int :
+def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[str, ...], cursor_color: str, initial_cursor_position: str | int = 0, output_format: type = str, color_options: str = "white") -> str | int :
     """Creates a graphical user interface menu in console, allowing users to navigate through the menu using arrow keys and select an option with enter key. Clears console once an option is selected.
 
     Args:
         - `title`: main title of the menu, can be displayed on multiple lines if a list or a tuple is passed
         - `options`: list of choices or actions that can be selected
-        - `cursor_color`: color of the cursor, available colors are the same as colors from termcolor module,
+        - `cursor_color`: color of the cursor, available colors are `red`, `green`, `yellow`, `blue`, `magenta`, `cyan` and `white`,
            use custom color by specifying ANSI color code using escape code `\\033`
         - `initial_cursor_position` (optional): index of element or element in `options` where the initial cursor position is set (default position is first element)
         - `output_format` (optionnal): output type of the function, default is `str`, which returns the selected element from `options`,
            pass `int` to get the index of the selected element
-        - `color_options` (optionnal): color of the options, available colors are the same as `cursor_color`, last option is not colored
+        - `color_options` (optionnal): color of the options, available colors are colors from termcolor module, last option is not colored (default color is white)
 
     Returns:
        - `selected_option`: element from `options` selected by the user if output_format is `str` else returns the index of the element"""
@@ -64,7 +65,7 @@ def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[st
         raise ValueError(f"argument 'output_format', excpects type str or int not {output_format.__name__}")
 
     os.system("cls")
-    sys.stdout.write("\033[?25l") # Hides cursor
+    sys.stdout.write("\033[?25l") # hides cursor
 
     if(type(title) == str):
         print('\n'*(VERTICAL_SPACING - 3))
@@ -81,7 +82,7 @@ def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[st
     key = None
     while(key != Keys.SELECT):
         for line, option in enumerate(options):
-            if(color_options == None or option == "Exit" or option == "Cancel"):
+            if(option == options[-1]):
                 if(line + VERTICAL_SPACING == cursor_height):
                     print(" " + cursor_color + option.center(TERMINAL_WIDTH - 1) + '\033[0m')
                 else:
@@ -95,15 +96,15 @@ def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[st
         key = msvcrt.getwch()
 
         if(key == Keys.UP):
-            if(cursor_height > VERTICAL_SPACING):
+            if(cursor_height > VERTICAL_SPACING): # if the cursor is not all the way up
                 cursor_height = cursor_height - 1
             else:
-                cursor_height = VERTICAL_SPACING + len(options) - 1
+                cursor_height = VERTICAL_SPACING + len(options) - 1 # moves the cursor all the way down
         elif(key == Keys.DOWN):
-            if(cursor_height < VERTICAL_SPACING + len(options) - 1):
+            if(cursor_height < VERTICAL_SPACING + len(options) - 1): # if the cursor is not all the way down
                 cursor_height = cursor_height + 1
             else:
-                cursor_height = VERTICAL_SPACING
+                cursor_height = VERTICAL_SPACING # moves the cursor all the way up
 
         sys.stdout.write('\033[F' * len(options))
 

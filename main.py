@@ -1,6 +1,6 @@
-from ListElement import ListElement
+from list_element import ListElement
 import create_list
-import list_manager
+import manage_list
 import utils
 
 import json
@@ -27,7 +27,7 @@ while(True):
         create_list.main(lists)
     elif(choice == MAIN_MENU[1]):
         if(len(lists) > 0):
-            list_manager.main(lists)
+            manage_list.main(lists)
         else:
             print("\n\033[95m You haven't created any list yet \033[0m\n")
             input(" Press enter to continue...")

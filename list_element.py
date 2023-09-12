@@ -9,5 +9,5 @@ class ListElement:
     def remove(self, element):
         self.content.remove(element)
 
-    def empty(self):
+    def clear(self):
         self.content.clear()

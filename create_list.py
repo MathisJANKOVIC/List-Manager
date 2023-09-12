@@ -1,4 +1,4 @@
-from ListElement import ListElement
+from list_element import ListElement
 import sys
 
 def main(lists):
@@ -22,15 +22,15 @@ def main(lists):
 
         elif(new_list_name in [list_element.name for list_element in lists]):
             sys.stdout.write(f"\033[31m List '{new_list_name}' already exists \033[0m")
+
         else:
             break
 
-        sys.stdout.write("\033[F" * 2) 
+        sys.stdout.write("\033[F" * 2)
         sys.stdout.write("\033[K") # deletes user input
 
     new_list_element = ListElement(new_list_name)
     lists.append(new_list_element)
 
-    sys.stdout.write("\033[K")
     print(f"\033[95m List '{new_list_name}' has been successfully created \n\033[0m")
     input(" Press enter to continue... ")
