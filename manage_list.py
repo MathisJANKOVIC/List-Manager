@@ -3,10 +3,11 @@ import sys
 
 OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Empty the list", "Delete the list", utils.EXIT_OPTION)
 CONFIRMATION_OPTIONS = ("Ok", "Cancel")
+LIST_CONTENT_MIN_MARGIN = 11
 
-def main(lists):
+def main(lists, initial_cursor_position=0):
     list_manager_options = [list_element.name for list_element in lists] + [utils.EXIT_OPTION]
-    selected_list_name = utils.menu("Select a list to manage", list_manager_options, utils.MENU_CURSOR_COLOR)
+    selected_list_name = utils.menu("Select a list to manage", list_manager_options, utils.MENU_CURSOR_COLOR, initial_cursor_position)
 
     if(selected_list_name != utils.EXIT_OPTION):
         for list in lists:
@@ -14,16 +15,16 @@ def main(lists):
                 selected_list = list
                 break
 
-        action = None
+        action = OPERATION_OPTIONS[0]
         while(action != utils.EXIT_OPTION):
             list_content = [f"- {element}" for element in list.content]
 
             if(len(list_content) > 0):
                 longer_element = max(list_content, key=len)
 
-                if(len(longer_element) < 10): # a changer
+                if(len(longer_element) < LIST_CONTENT_MIN_MARGIN): # a changer
                     for i, element in enumerate(list_content):
-                        list_content[i] = element.ljust(10)
+                        list_content[i] = element.ljust(LIST_CONTENT_MIN_MARGIN)
                 else:
                     for i, element in enumerate(list_content):
                         list_content[i] = element.ljust(len(longer_element))
@@ -32,7 +33,8 @@ def main(lists):
             else:
                 title_menu = selected_list.name + " (empty)"
 
-            action = utils.menu(title_menu, OPERATION_OPTIONS, utils.MENU_CURSOR_COLOR, color_options="light_yellow")
+
+            action = utils.menu(title_menu, OPERATION_OPTIONS, utils.MENU_CURSOR_COLOR, color_options="light_yellow", initial_cursor_position=action)
 
             if(action == OPERATION_OPTIONS[0]):
                 sys.stdout.write("\n")
@@ -66,13 +68,17 @@ def main(lists):
             elif(action == OPERATION_OPTIONS[1]):
                 if(len(selected_list.content) > 0):
                     rm_options = selected_list.content + ["Cancel"]
-                    element_to_rm = utils.menu("Choose an element to remove", rm_options, utils.MENU_CURSOR_COLOR, color_options="light_magenta")
 
-                    if(element_to_rm != OPERATION_OPTIONS[-1]):
-                        sure_to_rm = utils.menu(f"You are about to remove '{element_to_rm}' from '{selected_list.name}'", CONFIRMATION_OPTIONS, "red", initial_cursor_position=-1)
+                    sure_to_rm = None
+                    element_to_rm = 0
+                    while(sure_to_rm != CONFIRMATION_OPTIONS[0] and element_to_rm != rm_options[-1]):
+                        element_to_rm = utils.menu("Choose an element to remove", rm_options, utils.MENU_CURSOR_COLOR, color_options="light_magenta", initial_cursor_position=element_to_rm)
 
-                        if(sure_to_rm == CONFIRMATION_OPTIONS[0]):
-                            selected_list.remove(element_to_rm)
+                        if(element_to_rm != rm_options[-1]):
+                            sure_to_rm = utils.menu(f"You are about to remove '{element_to_rm}' from '{selected_list.name}'", CONFIRMATION_OPTIONS, "red", initial_cursor_position=-1)
+
+                            if(sure_to_rm == CONFIRMATION_OPTIONS[0]):
+                                selected_list.remove(element_to_rm)
                 else:
                     print("\n\033[95m You cannot remove an element, the list is empty \033[0m\n")
                     input(" Press enter to continue...")
@@ -94,6 +100,6 @@ def main(lists):
                     lists.remove(selected_list)
                     main(lists)
             else:
-                main(lists)
+                main(lists, selected_list_name)
     else:
         return

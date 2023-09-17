@@ -20,8 +20,10 @@ if(os.path.exists(SAVE_PATH) and os.path.getsize(SAVE_PATH) > 0):
             list_element = ListElement(saved_list["name"], saved_list["content"])
             lists.append(list_element)
 
+choice = MAIN_MENU[0]
+
 while(True):
-    choice = utils.menu("Welcome to List Manager", MAIN_MENU, utils.MENU_CURSOR_COLOR)
+    choice = utils.menu("Welcome to List Manager", MAIN_MENU, utils.MENU_CURSOR_COLOR, initial_cursor_position=choice)
 
     if(choice == MAIN_MENU[0]):
         create_list.main(lists)

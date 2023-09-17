@@ -74,15 +74,20 @@ def menu(title: str | list[str] | tuple[str, ...], options: list[str] | tuple[st
         print('\n'*(VERTICAL_SPACING - len(title) - 1))
         for line in title:
             if(line.startswith("-")): # if the option is an element of a list
-                termcolor.cprint(" " + line.center(TERMINAL_WIDTH - 1), "light_magenta")
+                termcolor.cprint(" " + line.center(TERMINAL_WIDTH - 1), color="light_magenta")
             else:
-                print(" " + line.center(TERMINAL_WIDTH - 1))
+                termcolor.cprint(" " + line.center(TERMINAL_WIDTH - 1))
         sys.stdout.write('\n')
 
     key = None
     while(key != Keys.SELECT):
         for line, option in enumerate(options):
-            if(option == options[-1]):
+            if(option == options[-1] and option == EXIT_OPTION):
+                if(line + VERTICAL_SPACING == cursor_height):
+                    termcolor.cprint(" " + cursor_color + option.center(TERMINAL_WIDTH - 1) + '\033[0m', "light_red")
+                else:
+                    termcolor.cprint(" " + option.center(TERMINAL_WIDTH - 1), "light_red")
+            elif(option == "Cancel" and len(options) > 2):
                 if(line + VERTICAL_SPACING == cursor_height):
                     print(" " + cursor_color + option.center(TERMINAL_WIDTH - 1) + '\033[0m')
                 else:
