@@ -29,6 +29,7 @@ class ListElement:
 
 class ListManager:
     lists: list[ListElement]
+    CONFIRM_OPTIONS = ("Ok", "Cancel")
 
     def __init__(self, lists: list[ListElement] = []):
         self.lists = lists
@@ -41,18 +42,15 @@ class ListManager:
 
     def load_data_from(self, file_path: str):
         if(os.path.exists(file_path) and os.path.getsize(file_path) > 0):
-            with open(file_path, "r", encoding="utf-8") as save_file:
-                saved_lists: list = json.load(save_file)
+            with open(file_path, "r", encoding="utf-8") as file:
+                saved_lists: list = json.load(file)
 
             for saved_list in saved_lists:
                 list_element = ListElement(saved_list["name"], saved_list["content"])
                 self.lists.append(list_element)
 
     def save(self, file_path: str):
-        lists_to_save: list[dict] = []
-
-        for list_element in self.lists:
-            lists_to_save.append(list_element.dict)
+        lists_to_save: list[dict] = [list_element.dict for list_element in self.lists]
 
         with open(file_path, "w", encoding="utf-8") as save_file:
             json.dump(lists_to_save, save_file, indent=4)
@@ -61,8 +59,8 @@ class ListManager:
         sys.stdout.write("\n")
 
         while(True):
-            new_list_name = input(" Enter the name of the list to create : ").strip()
-            new_list_name = new_list_name
+            new_list_name = input(" Enter the name of the list to create : ")
+            new_list_name = new_list_name.strip()
 
             sys.stdout.write("\n")
             sys.stdout.write("\033[K") # deletes potencily previous message error
@@ -106,9 +104,6 @@ class ListManager:
             elif(len(new_element) > 20):
                 sys.stdout.write("\033[31m Elements cannot be longer than 20 characters \033[0m")
 
-            elif(not new_element.replace(" ","").replace("-","").replace("_","").isalnum()):
-                sys.stdout.write("\033[31m Elements cannot contain special characters \033[0m")
-
             elif(list_element.contains(new_element)):
                 sys.stdout.write(f"\033[31m Element '{new_element}' already exists in '{list_name}'\033[0m")
             else:
@@ -124,11 +119,12 @@ class ListManager:
 
         if(len(list_element.content) > 0):
             rm_options = list_element.content + ["Cancel"]
-            rm_options_color = ["white" if option == "Cancel" else "light_magenta" for option in rm_options]
+            rm_options_color = [None if option == "Cancel" else "light_magenta" for option in rm_options]
 
-            sure_to_rm = element_to_rm = None
+            sure_to_rm = None
+            element_to_rm = 0
             # While the user doesn't cancel the operation or doesn't select an element to remove
-            while(sure_to_rm != 0 and element_to_rm != rm_options.index("Cancel")):
+            while(sure_to_rm != self.CONFIRM_OPTIONS[0] and element_to_rm != rm_options[-1]):
                 element_to_rm = pythonclimenu.menu(
                     title = "Choose an element to remove",
                     options = rm_options,
@@ -137,16 +133,16 @@ class ListManager:
                     initial_cursor_position = element_to_rm
                 )
 
-                if(element_to_rm != rm_options.index("Cancel")):
+                if(element_to_rm != rm_options[-1]):
                     sure_to_rm = pythonclimenu.menu(
-                        title = f"You are about to remove '{rm_options[element_to_rm]}' from '{list_element.name}'",
-                        options = ("Ok", "Cancel"),
+                        title = f"You are about to remove '{element_to_rm}' from '{list_element.name}'",
+                        options = self.CONFIRM_OPTIONS,
                         cursor_color = "red",
                         initial_cursor_position = -1
                     )
 
-                    if(sure_to_rm == 0):
-                        list_element.remove(rm_options[element_to_rm])
+                    if(sure_to_rm == self.CONFIRM_OPTIONS[0]):
+                        list_element.remove(element_to_rm)
         else:
             print("\n\033[95m You cannot remove an element, the list is empty \033[0m\n")
             input(" Press enter to continue...")
@@ -155,9 +151,19 @@ class ListManager:
         list_element: ListElement = self.find(list_name)
 
         if(len(list_element.content) > 0):
-            sure_to_clear = pythonclimenu.menu(f"You are about to clear list '{list_name}'", ("Ok", "Cancel"), "red", initial_cursor_position=-1)
-            if(sure_to_clear == 0):
+            sure_to_clear = pythonclimenu.menu(f"You are about to clear list '{list_name}'", self.CONFIRM_OPTIONS, "red", initial_cursor_position=-1)
+            if(sure_to_clear == self.CONFIRM_OPTIONS[0]):
                 list_element.clear()
         else:
             print("\n\033[95m The list is already empty \033[0m\n")
             input(" Press enter to continue...")
+
+    def delete(self, list_element: ListElement):
+        sure_to_delete = pythonclimenu.menu(f"You are about to delete list '{list_element.name}'", self.CONFIRM_OPTIONS, "red", initial_cursor_position=-1)
+
+        if(sure_to_delete == self.CONFIRM_OPTIONS[0]):
+            self.lists.remove(list_element)
+            initial_cursor_position = 0
+            return True
+        else:
+            return False

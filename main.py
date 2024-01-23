@@ -3,22 +3,18 @@ import manage_list
 import pythonclimenu
 
 SAVE_PATH = "save.json"
+MAIN_OPTIONS = ("Create a new list", "Select an existing list", "Save and quit")
 
 list_manager = ListManager()
 list_manager.load_data_from(SAVE_PATH)
 
 choice = 0
 while(True):
-    choice = pythonclimenu.menu(
-        title = "Welcome to List Manager",
-        options = ("Create a new list", "Select an existing list", "Save and quit"),
-        cursor_color = "blue",
-        initial_cursor_position = choice
-    )
+    choice = pythonclimenu.menu("Welcome to List Manager", MAIN_OPTIONS, "blue", initial_cursor_position=choice)
 
-    if(choice == 0):
+    if(choice == MAIN_OPTIONS[0]):
         list_manager.create_list()
-    elif(choice == 1):
+    elif(choice == MAIN_OPTIONS[1]):
         if(len(list_manager.lists) > 0):
             manage_list.main(list_manager)
         else:
