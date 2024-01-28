@@ -1,3 +1,4 @@
+import re
 import pythonclimenu
 import json
 import sys
@@ -27,6 +28,9 @@ class ListElement:
     def clear(self):
         self.content.clear()
 
+    def rename(self, new_name):
+        self.name = new_name
+
 class ListManager:
     lists: list[ListElement]
     CONFIRM_OPTIONS = ("Ok", "Cancel")
@@ -39,6 +43,23 @@ class ListManager:
             if(list_element.name == list_name):
                 return list_element
         return None
+
+    def check_list_name_validity(self, list_name: str):
+        if(len(list_name) < 3):
+            sys.stdout.write("\033[31m List name cannot be shorter than 3 characters \033[0m")
+
+        elif(len(list_name) > 20):
+            sys.stdout.write("\033[31m List name cannot be longer than 20 characters \033[0m")
+
+        elif(not list_name.replace(" ","").replace("-","").replace("_","").isalnum()):
+            sys.stdout.write("\033[31m List name cannot contain special characters\033[0m")
+
+        elif(self.find(list_name) is not None):
+            sys.stdout.write(f"\033[31m List '{list_name}' already exists \033[0m")
+        else:
+            return True
+
+        return False
 
     def load_data_from(self, file_path: str):
         if(os.path.exists(file_path) and os.path.getsize(file_path) > 0):
@@ -65,18 +86,7 @@ class ListManager:
             sys.stdout.write("\n")
             sys.stdout.write("\033[K") # deletes potencily previous message error
 
-            if(len(new_list_name) < 3):
-                sys.stdout.write("\033[31m List name cannot be shorter than 3 characters \033[0m")
-
-            elif(len(new_list_name) > 20):
-                sys.stdout.write("\033[31m List name cannot be longer than 20 characters \033[0m")
-
-            elif(not new_list_name.replace(" ","").replace("-","").replace("_","").isalnum()):
-                sys.stdout.write("\033[31m List name cannot contain special characters\033[0m")
-
-            elif(self.find(new_list_name) is not None):
-                sys.stdout.write(f"\033[31m List '{new_list_name}' already exists \033[0m")
-            else:
+            if(self.check_list_name_validity(new_list_name)):
                 break
 
             sys.stdout.write("\033[F" * 2)
@@ -85,6 +95,27 @@ class ListManager:
         self.lists.append(ListElement(new_list_name))
 
         print(f"\033[95m List '{new_list_name}' has been successfully created \n\033[0m")
+        input(" Press enter to continue... ")
+
+    def rename(self, list_element: ListElement):
+        sys.stdout.write("\n")
+
+        while(True):
+            new_list_name = input(f" Enter the new name for list '{list_element.name}' : ")
+            new_list_name = new_list_name.strip()
+
+            sys.stdout.write("\n")
+            sys.stdout.write("\033[K") # deletes potencily previous message error
+
+            if(self.check_list_name_validity(new_list_name)):
+                break
+
+            sys.stdout.write("\033[F" * 2)
+            sys.stdout.write("\033[K") # deletes user input
+
+        self.find(list_element.name).rename(new_list_name)
+
+        print(f"\033[95m List '{new_list_name}' has been successfully renamed \n\033[0m")
         input(" Press enter to continue... ")
 
     def add_element_to(self, list_name: str):
@@ -146,6 +177,7 @@ class ListManager:
         else:
             print("\n\033[95m You cannot remove an element, the list is empty \033[0m\n")
             input(" Press enter to continue...")
+
 
     def clear(self, list_name: str):
         list_element: ListElement = self.find(list_name)

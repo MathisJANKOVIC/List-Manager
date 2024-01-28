@@ -8,7 +8,7 @@ MAIN_OPTIONS = ("Create a new list", "Select an existing list", "Save and quit")
 list_manager = ListManager()
 list_manager.load_data_from(SAVE_PATH)
 
-choice = 0
+choice = MAIN_OPTIONS[0]
 while(True):
     choice = pythonclimenu.menu("Welcome to List Manager", MAIN_OPTIONS, "blue", initial_cursor_position=choice)
 

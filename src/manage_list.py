@@ -1,7 +1,7 @@
 from list_controller import ListManager
 import pythonclimenu
 
-OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Empty the list", "Delete the list", "Return")
+OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Rename the list", "Empty the list", "Delete the list", "Return")
 LIST_CONTENT_MIN_MARGIN = 11
 
 def main(list_manager: ListManager):
@@ -64,9 +64,13 @@ def main(list_manager: ListManager):
                     list_manager.remove_element_from(selected_list.name)
 
                 elif(operation_to_perform == OPERATION_OPTIONS[2]):
-                    list_manager.clear(selected_list.name)
+                    list_manager.rename(selected_list)
+                    selected_option = selected_list.name
 
                 elif(operation_to_perform == OPERATION_OPTIONS[3]):
+                    list_manager.clear(selected_list.name)
+
+                elif(operation_to_perform == OPERATION_OPTIONS[4]):
                     if(list_manager.delete(selected_list)):
                         break
                 else:
