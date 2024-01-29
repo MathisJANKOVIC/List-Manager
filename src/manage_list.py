@@ -1,14 +1,13 @@
-from list_controller import ListManager
+from ui_manager import UIManager
 import pythonclimenu
 
-OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Rename the list", "Empty the list", "Delete the list", "Return")
-LIST_CONTENT_MIN_MARGIN = 11
+OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Change name", "Clear the list", "Discard the list", "Return")
 
-def main(list_manager: ListManager):
+def main(ui_manager: UIManager):
     initial_cursor_position = 0
 
     while(True):
-        select_list_options = [list_element.name for list_element in list_manager.lists] + ["Return"]
+        select_list_options = [list["name"] for list in ui_manager.list_manager.lists] + ["Return"]
         select_list_options_color = ["light_red" if option == "Return" else None for option in select_list_options]
 
         selected_option = pythonclimenu.menu(
@@ -20,30 +19,27 @@ def main(list_manager: ListManager):
         )
 
         if(selected_option != select_list_options[-1]):
-            for list_element in list_manager.lists:
-                if(list_element.name == selected_option):
-                    selected_list = list_element
-                    break
+            selected_list = ui_manager.list_manager.find(selected_option)
 
             operation_to_perform = 0
             while(operation_to_perform != OPERATION_OPTIONS[-1]):
-                content_list = [f"- {element}" for element in selected_list.content]
+                content_list = [f"- {element}" for element in selected_list['content']]
 
                 if(len(content_list) > 0):
                     longer_element = max(content_list, key=len)
 
                     # Adjust the margin to the longest element else use a default margin
-                    if(len(longer_element) > LIST_CONTENT_MIN_MARGIN):
+                    if(len(longer_element) > UIManager.LIST_CONTENT_MIN_MARGIN):
                         for i, element in enumerate(content_list):
                             content_list[i] = element.ljust(len(longer_element))
                     else:
                         for i, element in enumerate(content_list):
-                            content_list[i] = element.ljust(LIST_CONTENT_MIN_MARGIN)
+                            content_list[i] = element.ljust(UIManager.LIST_CONTENT_MIN_MARGIN)
 
-                    operation_title = [f"{selected_list.name} content :\n"] + content_list
+                    operation_title = [f"{selected_list['name']} content :\n"] + content_list
                     operation_title_color = ["light_magenta" if line.startswith("-") else None for line in operation_title]
                 else:
-                    operation_title = selected_list.name + " (empty)"
+                    operation_title = selected_list['name'] + " (empty)"
                     operation_title_color = None
 
                 operation_options_color = ["light_red" if option == "Return" else "light_yellow" for option in OPERATION_OPTIONS]
@@ -58,20 +54,20 @@ def main(list_manager: ListManager):
                 )
 
                 if(operation_to_perform == OPERATION_OPTIONS[0]):
-                    list_manager.add_element_to(selected_list.name)
+                    ui_manager.add_element_to_list(selected_list['name'])
 
                 elif(operation_to_perform == OPERATION_OPTIONS[1]):
-                    list_manager.remove_element_from(selected_list.name)
+                    ui_manager.remove_element_from_list(selected_list['name'])
 
                 elif(operation_to_perform == OPERATION_OPTIONS[2]):
-                    list_manager.rename(selected_list)
-                    selected_option = selected_list.name
+                    ui_manager.rename_list(selected_list['name'])
+                    selected_option = selected_list['name']
 
                 elif(operation_to_perform == OPERATION_OPTIONS[3]):
-                    list_manager.clear(selected_list.name)
+                    ui_manager.clear_list(selected_list['name'])
 
                 elif(operation_to_perform == OPERATION_OPTIONS[4]):
-                    if(list_manager.delete(selected_list)):
+                    if(ui_manager.delete_list(selected_list['name'])):
                         break
                 else:
                     initial_cursor_position = selected_option
