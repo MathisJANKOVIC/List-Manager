@@ -42,6 +42,8 @@ class UIManager:
         self.list_manager = list_manager
 
     def check_list_name_validity(self, list_name: str, rename: bool = False):
+        same_list_name = self.list_manager.find(list_name)
+
         if(len(list_name) < 3):
             Console.write("List name cannot be shorter than 3 characters", "red")
 
@@ -51,9 +53,9 @@ class UIManager:
         elif(not list_name.replace(" ","").replace("-","").replace("_","").isalnum()):
             Console.write("List name cannot contain special characters", "red")
 
-        elif(same_list_name := self.list_manager.find(list_name) is not None):
-            if(rename and same_list_name["name"] != list_name):
-                Console.write("The new list name is the same as the old", "red")
+        elif(same_list_name is not None):
+            if(rename and same_list_name["name"] == list_name):
+                Console.write("The new list name cannot be the same as the old", "red")
             else:
                 Console.write(f"List '{list_name}' already exists", "red")
         else:
@@ -86,7 +88,7 @@ class UIManager:
         Console.move_cursor_down()
 
         while(True):
-            new_list_name = Console.prompt(f"Enter the new name for list '{list_name}' : ")
+            new_list_name = Console.prompt(f"Enter the new name for the list :")
             new_list_name = new_list_name.strip()
 
             Console.move_cursor_down()
@@ -170,7 +172,7 @@ class UIManager:
             if(sure_to_clear == self.CONFIRM_OPTIONS[0]):
                 self.list_manager.clear(list_name)
         else:
-            Console.write(f"The list is already empty, you can't clear it \n\n", "light_magenta")
+            Console.write(f"\nThe list is already empty, you cannot clear it \n\n", "light_magenta")
             Console.prompt("Press enter to continue...")
 
     def delete_list(self, list_name: str):

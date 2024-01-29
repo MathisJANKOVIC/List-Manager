@@ -20,7 +20,7 @@ while(True):
         if(ui_manager.list_manager.contains_list()):
             manage_list.main(ui_manager)
         else:
-            Console.write("You haven't created any list yet \n")
+            Console.write("You haven't created any list yet \n\n", "light_magenta")
             Console.prompt("Press enter to continue...")
     else:
         ui_manager.list_manager.save(SAVE_PATH)
