@@ -88,7 +88,7 @@ class UIManager:
         Console.move_cursor_down()
 
         while(True):
-            new_list_name = Console.prompt(f"Enter the new name for the list :")
+            new_list_name = Console.prompt(f"Enter the new name for the list '{list_name}' :")
             new_list_name = new_list_name.strip()
 
             Console.move_cursor_down()
@@ -172,7 +172,8 @@ class UIManager:
             if(sure_to_clear == self.CONFIRM_OPTIONS[0]):
                 self.list_manager.clear(list_name)
         else:
-            Console.write(f"\nThe list is already empty, you cannot clear it \n\n", "light_magenta")
+            Console.move_cursor_down()
+            Console.write(f"The list is already empty, you cannot clear it \n\n", "light_magenta")
             Console.prompt("Press enter to continue...")
 
     def delete_list(self, list_name: str):

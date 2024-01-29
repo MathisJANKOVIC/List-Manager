@@ -1,4 +1,4 @@
-from ui_manager import UIManager
+from ui_manager import UIManager, Console
 import pythonclimenu
 
 OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Change name", "Clear the list", "Discard the list", "Return")
@@ -7,6 +7,12 @@ def main(ui_manager: UIManager):
     initial_cursor_position = 0
 
     while(True):
+        if(not ui_manager.list_manager.contains_list()):
+            Console.move_cursor_down()
+            Console.write("It appears you have no lists, let's create a new one\n\n", "light_magenta")
+            Console.prompt("Press enter to continue...")
+            return
+
         select_list_options = [list["name"] for list in ui_manager.list_manager.lists] + ["Return"]
         select_list_options_color = ["light_red" if option == "Return" else None for option in select_list_options]
 

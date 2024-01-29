@@ -1,5 +1,5 @@
-from ui_manager import UIManager, Console
 from list_controller import ListManager
+from ui_manager import UIManager
 import manage_list
 
 import pythonclimenu
@@ -17,11 +17,7 @@ while(True):
     if(choice == MAIN_OPTIONS[0]):
         ui_manager.create_list()
     elif(choice == MAIN_OPTIONS[1]):
-        if(ui_manager.list_manager.contains_list()):
-            manage_list.main(ui_manager)
-        else:
-            Console.write("You haven't created any list yet \n\n", "light_magenta")
-            Console.prompt("Press enter to continue...")
+        manage_list.main(ui_manager)
     else:
         ui_manager.list_manager.save(SAVE_PATH)
         exit()

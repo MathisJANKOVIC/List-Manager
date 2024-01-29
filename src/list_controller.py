@@ -1,6 +1,5 @@
 import json
 import os
-import re
 
 class ListManager:
     lists: list[dict[str, list[str]]]
