@@ -1,6 +1,5 @@
+from ui_manager import UIManager, Console
 from list_controller import ListManager
-from ui_manager import UIManager
-from ui_manager import Console
 import manage_list
 
 import pythonclimenu
@@ -22,7 +21,7 @@ while(True):
             manage_list.main(ui_manager)
         else:
             Console.write("You haven't created any list yet \n")
-            input(" Press enter to continue...")
+            Console.prompt("Press enter to continue...")
     else:
         ui_manager.list_manager.save(SAVE_PATH)
         exit()
