@@ -8,7 +8,8 @@ def main(uimanager: UIManager):
 
     while(True):
         if(not uimanager.list_manager.contains_list()):
-            Console.write("\n It appears you have no lists, let's create a new one\n\n", "light_magenta", margin=0)
+            Console.move_cursor_down()
+            Console.write("It appears you have no lists, let's create a new one\n\n", UIManager.INFO_COLOR)
             Console.prompt("Press enter to continue...")
             return
 

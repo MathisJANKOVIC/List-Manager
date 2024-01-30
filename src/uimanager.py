@@ -35,6 +35,8 @@ class Console:
 
 class UIManager:
     list_manager: ListManager
+    ERROR_COLOR: str = "red"
+    INFO_COLOR: str = "light_magenta"
     LIST_CONTENT_MIN_MARGIN: int = 11
     CONFIRM_OPTIONS: tuple = ("Ok", "Cancel")
 
@@ -45,22 +47,22 @@ class UIManager:
         same_list_name = self.list_manager.find(list_name)
 
         if(len(list_name) < 3):
-            Console.write("List name cannot be shorter than 3 characters", "red")
+            Console.write("List name cannot be shorter than 3 characters", self.ERROR_COLOR)
 
         elif(len(list_name) > 20):
-            Console.write("List name cannot be longer than 20 characters", "red")
+            Console.write("List name cannot be longer than 20 characters", self.ERROR_COLOR)
 
         elif(list_name.startswith("'") or list_name.endswith("'")):
-            Console.write("List name cannot start or end with a quote", "red")
+            Console.write("List name cannot start or end with a quote", self.ERROR_COLOR)
 
         elif(not list_name.replace(" ","").replace("-","").replace("_","").replace("'","").isalnum()):
-            Console.write("List name cannot contain special characters", "red")
+            Console.write("List name cannot contain special characters", self.ERROR_COLOR)
 
         elif(same_list_name is not None):
             if(rename and same_list_name["name"] == list_name):
-                Console.write("The new list name cannot be the same as the old", "red")
+                Console.write("The new list name cannot be the same as the old", self.ERROR_COLOR)
             else:
-                Console.write(f"List '{list_name}' already exists", "red")
+                Console.write(f"List '{list_name}' already exists", self.ERROR_COLOR)
         else:
             return True
 
@@ -84,7 +86,7 @@ class UIManager:
 
         self.list_manager.create(list_name)
 
-        Console.write(f"List '{list_name}' has been successfully created \n\n", "light_magenta")
+        Console.write(f"List '{list_name}' has been successfully created \n\n", self.INFO_COLOR)
         Console.prompt("Press enter to continue...")
 
     def rename_list(self, list_name: str):
@@ -105,7 +107,7 @@ class UIManager:
 
         self.list_manager.rename(list_name, new_list_name)
 
-        Console.write(f"List '{list_name}' has been successfully renamed into '{new_list_name}' \n\n", "light_magenta")
+        Console.write(f"List '{list_name}' has been successfully renamed into '{new_list_name}' \n\n", self.INFO_COLOR)
         Console.prompt("Press enter to continue...")
 
     def add_element_to_list(self, list_name: str):
@@ -119,16 +121,16 @@ class UIManager:
             Console.eraseline()
 
             if(len(new_element) == 0):
-                Console.write("Elements cannot be empty", "red")
+                Console.write("Elements cannot be empty", self.ERROR_COLOR)
 
-            elif(len(new_element) > 20):
-                Console.write("Elements cannot be longer than 20 characters", "red")
+            elif(len(new_element) > 27):
+                Console.write("Elements cannot be longer than 27 characters", self.ERROR_COLOR)
 
             elif(new_element.startswith("'") or new_element.endswith("'")):
-                Console.write("Elements cannot start or end with a quote", "red")
+                Console.write("Elements cannot start or end with a quote", self.ERROR_COLOR)
 
             elif(self.list_manager.contains_element(list_name, new_element)):
-                Console.write(f"Element '{new_element}' already exists in '{list_name}'", "red")
+                Console.write(f"Element '{new_element}' already exists in '{list_name}'", self.ERROR_COLOR)
             else:
                 break
 
@@ -142,7 +144,7 @@ class UIManager:
 
         if(len(list["content"]) > 0):
             rm_options = list["content"] + ["Cancel"]
-            rm_options_color = [None if option == "Cancel" else "light_magenta" for option in rm_options]
+            rm_options_color = [None if option == "Cancel" else self.INFO_COLOR for option in rm_options]
 
             sure_to_rm = None
             element_to_rm = 0
@@ -167,7 +169,8 @@ class UIManager:
                     if(sure_to_rm == self.CONFIRM_OPTIONS[0]):
                         self.list_manager.remove_element(list_name, element_to_rm)
         else:
-            Console.write(f"You cannot remove an element, the list is empty \n\n", "light_magenta")
+            Console.move_cursor_down()
+            Console.write(f"You cannot remove an element, the list is empty \n\n", self.INFO_COLOR)
             Console.prompt("Press enter to continue...")
 
     def clear_list(self, list_name: str):
@@ -178,7 +181,8 @@ class UIManager:
             if(sure_to_clear == self.CONFIRM_OPTIONS[0]):
                 self.list_manager.clear(list_name)
         else:
-            Console.write(f"\n The list is already empty, you cannot clear it \n\n", "light_magenta", margin=0)
+            Console.move_cursor_down()
+            Console.write(f"The list is already empty, you cannot clear it \n\n", self.INFO_COLOR)
             Console.prompt("Press enter to continue...")
 
     def delete_list(self, list_name: str):
