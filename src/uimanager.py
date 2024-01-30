@@ -1,4 +1,4 @@
-from list_controller import ListManager
+from list_manager import ListManager
 import pythonclimenu
 import sys
 
@@ -10,12 +10,12 @@ class Console:
         sys.stdout.write("\033[K")
 
     @staticmethod
-    def move_cursor_up(line_number: int = 1):
-        sys.stdout.write("\033[F" * line_number)
+    def move_cursor_up(n: int = 1):
+        sys.stdout.write("\033[F" * n)
 
     @staticmethod
-    def move_cursor_down(line_number: int = 1):
-        sys.stdout.write("\n" * line_number)
+    def move_cursor_down(n: int = 1):
+        sys.stdout.write("\n" * n)
 
     @staticmethod
     def write(text: str, color: str = None, margin: int = 1):
@@ -50,7 +50,10 @@ class UIManager:
         elif(len(list_name) > 20):
             Console.write("List name cannot be longer than 20 characters", "red")
 
-        elif(not list_name.replace(" ","").replace("-","").replace("_","").isalnum()):
+        elif(list_name.startswith("'") or list_name.endswith("'")):
+            Console.write("List name cannot start or end with a quote", "red")
+
+        elif(not list_name.replace(" ","").replace("-","").replace("_","").replace("'","").isalnum()):
             Console.write("List name cannot contain special characters", "red")
 
         elif(same_list_name is not None):
@@ -121,6 +124,9 @@ class UIManager:
             elif(len(new_element) > 20):
                 Console.write("Elements cannot be longer than 20 characters", "red")
 
+            elif(new_element.startswith("'") or new_element.endswith("'")):
+                Console.write("Elements cannot start or end with a quote", "red")
+
             elif(self.list_manager.contains_element(list_name, new_element)):
                 Console.write(f"Element '{new_element}' already exists in '{list_name}'", "red")
             else:
@@ -172,8 +178,7 @@ class UIManager:
             if(sure_to_clear == self.CONFIRM_OPTIONS[0]):
                 self.list_manager.clear(list_name)
         else:
-            Console.move_cursor_down()
-            Console.write(f"The list is already empty, you cannot clear it \n\n", "light_magenta")
+            Console.write(f"\n The list is already empty, you cannot clear it \n\n", "light_magenta", margin=0)
             Console.prompt("Press enter to continue...")
 
     def delete_list(self, list_name: str):

@@ -1,4 +1,4 @@
-from list_controller import ListManager
+from list_manager import ListManager
 import pythonclimenu
 
 OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Empty the list", "Delete the list", "Return")

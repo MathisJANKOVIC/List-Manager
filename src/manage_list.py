@@ -1,19 +1,18 @@
-from ui_manager import UIManager, Console
+from uimanager import UIManager, Console
 import pythonclimenu
 
 OPERATION_OPTIONS = ("Add a new element", "Remove an element", "Change name", "Clear the list", "Discard the list", "Return")
 
-def main(ui_manager: UIManager):
+def main(uimanager: UIManager):
     initial_cursor_position = 0
 
     while(True):
-        if(not ui_manager.list_manager.contains_list()):
-            Console.move_cursor_down()
-            Console.write("It appears you have no lists, let's create a new one\n\n", "light_magenta")
+        if(not uimanager.list_manager.contains_list()):
+            Console.write("\n It appears you have no lists, let's create a new one\n\n", "light_magenta", margin=0)
             Console.prompt("Press enter to continue...")
             return
 
-        select_list_options = [list["name"] for list in ui_manager.list_manager.lists] + ["Return"]
+        select_list_options = [list["name"] for list in uimanager.list_manager.lists] + ["Return"]
         select_list_options_color = ["light_red" if option == "Return" else None for option in select_list_options]
 
         selected_option = pythonclimenu.menu(
@@ -25,7 +24,7 @@ def main(ui_manager: UIManager):
         )
 
         if(selected_option != select_list_options[-1]):
-            selected_list = ui_manager.list_manager.find(selected_option)
+            selected_list = uimanager.list_manager.find(selected_option)
 
             operation_to_perform = 0
             while(operation_to_perform != OPERATION_OPTIONS[-1]):
@@ -60,20 +59,20 @@ def main(ui_manager: UIManager):
                 )
 
                 if(operation_to_perform == OPERATION_OPTIONS[0]):
-                    ui_manager.add_element_to_list(selected_list['name'])
+                    uimanager.add_element_to_list(selected_list['name'])
 
                 elif(operation_to_perform == OPERATION_OPTIONS[1]):
-                    ui_manager.remove_element_from_list(selected_list['name'])
+                    uimanager.remove_element_from_list(selected_list['name'])
 
                 elif(operation_to_perform == OPERATION_OPTIONS[2]):
-                    ui_manager.rename_list(selected_list['name'])
+                    uimanager.rename_list(selected_list['name'])
                     selected_option = selected_list['name']
 
                 elif(operation_to_perform == OPERATION_OPTIONS[3]):
-                    ui_manager.clear_list(selected_list['name'])
+                    uimanager.clear_list(selected_list['name'])
 
                 elif(operation_to_perform == OPERATION_OPTIONS[4]):
-                    if(ui_manager.delete_list(selected_list['name'])):
+                    if(uimanager.delete_list(selected_list['name'])):
                         break
                 else:
                     initial_cursor_position = selected_option
