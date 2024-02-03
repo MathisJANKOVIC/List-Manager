@@ -5,10 +5,10 @@ List Manager is a python console-based application created to simplify the creat
 The program comes with an interactive menu, powered by `python-cli-menu`, my brand new module, which allows you to navigate using directional arrows and to select an option by pressing the enter key.
 
 ## Overview
-![manage-list menu](/manage_list_menu.png)
+![manage-list menu](manage_list_menu.png)
 
 ## Installation
-Python 3.10 or later is required to run the project.
+Python 3.10 or later is required to run the program.
 ```bash
 # Clone the repository
 git clone https://github.com/MathisJANKOVIC/List-Manager.git
