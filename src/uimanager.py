@@ -1,195 +1,151 @@
-from list_manager import ListManager
+from listmanager import ListManager, AlreadyTakenNameError, TooShortNameError, TooLongNameError, InvalidNameError
+import console
+
 import pythonclimenu
-import sys
-
-class Console:
-    ANSICOLORS: tuple = ("default", "red", "green", "yellow", "blue", "magenta", "cyan", "white")
-
-    @staticmethod
-    def eraseline():
-        sys.stdout.write("\033[K")
-
-    @staticmethod
-    def move_cursor_up(n: int = 1):
-        sys.stdout.write("\033[F" * n)
-
-    @staticmethod
-    def move_cursor_down(n: int = 1):
-        sys.stdout.write("\n" * n)
-
-    @staticmethod
-    def write(text: str, color: str = None, margin: int = 1):
-        text = " " * margin + text
-        if(color is None):
-            sys.stdout.write(text)
-        else:
-            if(color.startswith("light")):
-                sys.stdout.write(f"\033[9{Console.ANSICOLORS.index(color.removeprefix('light_'))}m{text}\033[0m")
-            else:
-                sys.stdout.write(f"\033[3{Console.ANSICOLORS.index(color)}m{text}\033[0m")
-
-    @staticmethod
-    def prompt(text: str, color: str = None, margin: int = 1) -> str:
-        Console.write(text + " ", color, margin)
-        return input()
 
 class UIManager:
     list_manager: ListManager
-    ERROR_COLOR: str = "red"
-    INFO_COLOR: str = "light_magenta"
-    LIST_CONTENT_MIN_MARGIN: int = 11
-    CONFIRM_OPTIONS: tuple = ("Ok", "Cancel")
+    MESSAGE_COLORS = {"info": "light_magenta", "error": "red"}
+    MIN_MARGIN_LIST_CONTENT = 11
+    CONFIRM_OPTIONS = ("Ok", "Cancel")
 
-    def __init__(self, list_manager: ListManager):
-        self.list_manager = list_manager
+    def __init__(self) -> None:
+        self.list_manager = ListManager()
 
-    def check_list_name_validity(self, list_name: str, rename: bool = False):
-        same_list_name = self.list_manager.find(list_name)
-
-        if(len(list_name) < 3):
-            Console.write("List name cannot be shorter than 3 characters", self.ERROR_COLOR)
-
-        elif(len(list_name) > 20):
-            Console.write("List name cannot be longer than 20 characters", self.ERROR_COLOR)
-
-        elif(list_name.startswith("'") or list_name.endswith("'")):
-            Console.write("List name cannot start or end with a quote", self.ERROR_COLOR)
-
-        elif(not list_name.replace(" ","").replace("-","").replace("_","").replace("'","").isalnum()):
-            Console.write("List name cannot contain special characters", self.ERROR_COLOR)
-
-        elif(same_list_name is not None):
-            if(rename and same_list_name["name"] == list_name):
-                Console.write("The new list name cannot be the same as the old", self.ERROR_COLOR)
-            else:
-                Console.write(f"List '{list_name}' already exists", self.ERROR_COLOR)
-        else:
-            return True
-
-        return False
-
-    def create_list(self):
-        Console.move_cursor_down()
-
+    def create_list(self) -> None:
+        console.move_cursor_down()
         while(True):
-            list_name = Console.prompt("Enter the name of the list to create :")
+            list_name = console.prompt("Enter the name of the list to create :")
             list_name = list_name.strip()
 
-            Console.move_cursor_down()
-            Console.eraseline() # deletes potencily previous message error
+            console.move_cursor_down()
+            console.clear_line() # deletes potencily previous message error
 
-            if(self.check_list_name_validity(list_name)):
-                break
+            try:
+                self.list_manager.create_list(list_name)
+            except AlreadyTakenNameError:
+                console.write(f"List '{list_name}' already exists, please choose another name ", self.MESSAGE_COLORS["error"])
+            except TooShortNameError:
+                console.write(f"List name must be at least {ListManager.MIN_NAME_LENGTH} character long ", self.MESSAGE_COLORS["error"])
+            except TooLongNameError:
+                console.write(f"List name must be at most {ListManager.MAX_NAME_LENGTH} characters long ", self.MESSAGE_COLORS["error"])
+            except InvalidNameError:
+                console.write("List name must be alphanumeric ", self.MESSAGE_COLORS["error"])
+            else:
+                console.write(f"List '{list_name}' has been successfully created \n\n", self.MESSAGE_COLORS["info"])
+                console.prompt("Press enter to continue...")
+                return
 
-            Console.move_cursor_up(2)
-            Console.eraseline() # deletes user input
+            console.move_cursor_up(lines=2)
+            console.clear_line() # deletes user input
 
-        self.list_manager.create(list_name)
-
-        Console.write(f"List '{list_name}' has been successfully created \n\n", self.INFO_COLOR)
-        Console.prompt("Press enter to continue...")
-
-    def rename_list(self, list_name: str):
-        Console.move_cursor_down()
-
+    def rename_list(self, list_name: str) -> str:
+        console.move_cursor_down()
         while(True):
-            new_list_name = Console.prompt(f"Enter the new name for the list '{list_name}' :")
-            new_list_name = new_list_name.strip()
+            try:
+                new_list_name = console.prompt("Enter the name of the list to rename :").strip()
+            except KeyboardInterrupt:
+                console.move_cursor_down()
+                console.write("Operation canceled \n\n", self.MESSAGE_COLORS["info"])
+                console.prompt("Press enter to continue...")
+                return
 
-            Console.move_cursor_down()
-            Console.eraseline()
+            console.move_cursor_down()
+            console.clear_line() # deletes potencily previous message error
 
-            if(self.check_list_name_validity(new_list_name, rename=True)):
-                break
+            try:
+                self.list_manager.rename_list(list_name, new_list_name)
+            except AlreadyTakenNameError as e:
+                console.write(f"List '{new_list_name}' already exists, please choose another name ", self.MESSAGE_COLORS["error"])
+            except TooShortNameError:
+                console.write(f"List name must be at least {ListManager.MIN_NAME_LENGTH} character long ", self.MESSAGE_COLORS["error"])
+            except TooLongNameError:
+                console.write(f"List name must be at most {ListManager.MAX_NAME_LENGTH} characters long ", self.MESSAGE_COLORS["error"])
+            except InvalidNameError:
+                console.write("List name must be alphanumeric ", self.MESSAGE_COLORS["error"])
+            else:
+                console.write(f"List '{list_name}' has been successfully created \n\n", self.MESSAGE_COLORS["info"])
+                console.prompt("Press enter to continue...")
+                return new_list_name
 
-            Console.move_cursor_up(2)
-            Console.eraseline()
-
-        self.list_manager.rename(list_name, new_list_name)
-
-        Console.write(f"List '{list_name}' has been successfully renamed into '{new_list_name}' \n\n", self.INFO_COLOR)
-        Console.prompt("Press enter to continue...")
+            console.move_cursor_up(lines=2)
+            console.clear_line() # deletes user input
 
     def add_element_to_list(self, list_name: str):
-        Console.move_cursor_down()
-
+        console.move_cursor_down()
         while(True):
-            new_element = Console.prompt(f"Enter the element to add to list '{list_name}' :")
+            new_element = console.prompt(f"Enter the element to add to list '{list_name}' :")
             new_element = new_element.strip()
 
-            Console.move_cursor_down()
-            Console.eraseline()
+            console.move_cursor_down()
+            console.clear_line()
 
-            if(len(new_element) == 0):
-                Console.write("Elements cannot be empty", self.ERROR_COLOR)
-
-            elif(len(new_element) > 27):
-                Console.write("Elements cannot be longer than 27 characters", self.ERROR_COLOR)
-
-            elif(new_element.startswith("'") or new_element.endswith("'")):
-                Console.write("Elements cannot start or end with a quote", self.ERROR_COLOR)
-
-            elif(self.list_manager.contains_element(list_name, new_element)):
-                Console.write(f"Element '{new_element}' already exists in '{list_name}'", self.ERROR_COLOR)
+            try:
+                self.list_manager.add_item(list_name, new_element)
+            except AlreadyTakenNameError:
+                console.write(f"Element '{new_element}' already exists in list '{list_name}', please choose another name ", self.MESSAGE_COLORS["error"])
+            except TooShortNameError:
+                console.write(f"Element name must be at least {ListManager.MIN_NAME_LENGTH} character long ", self.MESSAGE_COLORS["error"])
+            except TooLongNameError:
+                console.write(f"Element name must be at most {ListManager.MAX_NAME_LENGTH} characters long ", self.MESSAGE_COLORS["error"])
+            except InvalidNameError:
+                console.write("Element name must be alphanumeric ", self.MESSAGE_COLORS["error"])
             else:
-                break
+                console.write(f"Element '{new_element}' has been successfully added to list '{list_name}' \n\n", self.MESSAGE_COLORS["info"])
+                console.prompt("Press enter to continue...")
+                return
 
-            Console.move_cursor_up(2)
-            Console.eraseline()
-
-        self.list_manager.add_element(list_name, new_element)
+            console.move_cursor_up(lines=2)
+            console.clear_line()
 
     def remove_element_from_list(self, list_name: str):
-        list = self.list_manager.find(list_name)
+        if(not self.list_manager.has_items(list_name)):
+            console.move_cursor_down()
+            console.write(f"You cannot remove an element, the list is empty \n\n", self.MESSAGE_COLORS["info"])
+            console.prompt("Press enter to continue...")
+            return
 
-        if(len(list["content"]) > 0):
-            rm_options = list["content"] + ["Cancel"]
-            rm_options_color = [None if option == "Cancel" else self.INFO_COLOR for option in rm_options]
+        rm_options = self.list_manager.get_items(list_name) + ["Cancel"]
+        rm_options_color = [None if option == "Cancel" else self.MESSAGE_COLORS["info"] for option in rm_options]
 
-            sure_to_rm = None
-            element_to_rm = 0
-            # While the user doesn't cancel the operation or doesn't select an element to remove
-            while(sure_to_rm != self.CONFIRM_OPTIONS[0] and element_to_rm != rm_options[-1]):
-                element_to_rm = pythonclimenu.menu(
-                    title = "Choose an element to remove",
-                    options = rm_options,
-                    cursor_color = "blue",
-                    options_color = rm_options_color,
-                    initial_cursor_position = element_to_rm
+        sure_to_rm = None
+        element_to_rm = 0
+        # While the user doesn't cancel the operation or doesn't select an element to remove
+        while(sure_to_rm != self.CONFIRM_OPTIONS[0] and element_to_rm != rm_options[-1]):
+            element_to_rm = pythonclimenu.menu(
+                title = "Choose an element to remove",
+                options = rm_options,
+                cursor_color = "blue",
+                options_color = rm_options_color,
+                initial_cursor_position = element_to_rm
+            )
+
+            if(element_to_rm != rm_options[-1]):
+                sure_to_rm = pythonclimenu.menu(
+                    title = f"You are about to remove '{element_to_rm}' from '{list_name}'",
+                    options = self.CONFIRM_OPTIONS,
+                    cursor_color = "red",
+                    initial_cursor_position = -1
                 )
 
-                if(element_to_rm != rm_options[-1]):
-                    sure_to_rm = pythonclimenu.menu(
-                        title = f"You are about to remove '{element_to_rm}' from '{list_name}'",
-                        options = self.CONFIRM_OPTIONS,
-                        cursor_color = "red",
-                        initial_cursor_position = -1
-                    )
-
-                    if(sure_to_rm == self.CONFIRM_OPTIONS[0]):
-                        self.list_manager.remove_element(list_name, element_to_rm)
-        else:
-            Console.move_cursor_down()
-            Console.write(f"You cannot remove an element, the list is empty \n\n", self.INFO_COLOR)
-            Console.prompt("Press enter to continue...")
+                if(sure_to_rm == self.CONFIRM_OPTIONS[0]):
+                    self.list_manager.remove_item(list_name, element_to_rm)
 
     def clear_list(self, list_name: str):
-        list = self.list_manager.find(list_name)
-
-        if(len(list["content"]) > 0):
+        if(self.list_manager.has_items(list_name)):
             sure_to_clear = pythonclimenu.menu(f"You are about to clear list '{list_name}'", self.CONFIRM_OPTIONS, "red", initial_cursor_position=-1)
             if(sure_to_clear == self.CONFIRM_OPTIONS[0]):
-                self.list_manager.clear(list_name)
+                self.list_manager.clear_list(list_name)
         else:
-            Console.move_cursor_down()
-            Console.write(f"The list is already empty, you cannot clear it \n\n", self.INFO_COLOR)
-            Console.prompt("Press enter to continue...")
+            console.move_cursor_down()
+            console.write(f"The list is already empty, you cannot clear it \n\n", self.MESSAGE_COLORS["info"])
+            console.prompt("Press enter to continue...")
 
     def delete_list(self, list_name: str):
         sure_to_delete = pythonclimenu.menu(f"You are about to delete list '{list_name}'", self.CONFIRM_OPTIONS, "red", initial_cursor_position=-1)
 
         if(sure_to_delete == self.CONFIRM_OPTIONS[0]):
-            self.list_manager.delete(list_name)
+            self.list_manager.delete_list(list_name)
             return True
         else:
             return False
