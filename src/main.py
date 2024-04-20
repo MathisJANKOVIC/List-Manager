@@ -1,21 +1,69 @@
-from uimanager import UIManager
-import pythonclimenu
-import managelist
+from interface.menu import MainMenu, ListMenu, ManageListMenu, ConfirmDeleteListMenu, ConfirmClearListMenu, DeleteItemMenu
+from interface.listui import ListUI
+from listmanager import ListManager
 
 SAVE_PATH = "save.json"
-MAIN_OPTIONS = ("Create a new list", "Select an existing list", "Save and quit")
 
-ui_manager = UIManager()
-ui_manager.list_manager.load(SAVE_PATH)
+list_manager = ListManager()
+list_manager.load(SAVE_PATH)
 
-choice = MAIN_OPTIONS[0]
-while(True):
-    choice = pythonclimenu.menu("Welcome to List Manager", MAIN_OPTIONS, "blue", initial_cursor_position=choice)
+listui = ListUI(list_manager)
 
-    if(choice == MAIN_OPTIONS[0]):
-        ui_manager.create_list()
-    elif(choice == MAIN_OPTIONS[1]):
-        managelist.main(ui_manager)
-    else:
-        ui_manager.list_manager.save(SAVE_PATH)
-        quit()
+main_menu = MainMenu()
+choice = main_menu.options[0]
+
+while(choice != main_menu.options[-1]):
+    choice = main_menu.display(init_cursor_position=choice)
+
+    if(choice == main_menu.options[0]):
+        listui.create_list()
+    elif(choice == main_menu.options[1]):
+        if(not list_manager.has_lists()):
+            listui.handle_no_lists()
+            continue
+
+        selected_list = 0
+        while(True):
+            list_menu = ListMenu(list_manager.list_names)
+            selected_list = list_menu.display(init_cursor_position=selected_list)
+
+            if(selected_list == ListMenu.RETURN["label"]):
+                break
+
+            action = 0
+            while(action != ManageListMenu.RETURN["label"]):
+                manage_list_menu = ManageListMenu(selected_list, list_manager.items(selected_list))
+                action = manage_list_menu.display(init_cursor_position=action)
+
+                if(action == manage_list_menu.options[0]):
+                    listui.add_element_to_list(selected_list)
+
+                elif(action == manage_list_menu.options[1]):
+                    delete_item_menu = DeleteItemMenu(selected_list, list_manager.items(selected_list))
+                    item_to_delete = delete_item_menu.display()
+                    if(item_to_delete != delete_item_menu.options[-1]):
+                        confirm_menu = ConfirmDeleteListMenu(selected_list)
+                        confirm = confirm_menu.display()
+                        if(confirm == confirm_menu.options[0]):
+                            list_manager.remove_item_from(selected_list, item_to_delete)
+
+                elif(action == manage_list_menu.options[2]):
+                    selected_list = listui.rename_list(selected_list)
+
+                elif(action == manage_list_menu.options[3]):
+                    confirm_menu = ConfirmClearListMenu(selected_list)
+                    confirm = confirm_menu.display()
+
+                    if(confirm == confirm_menu.options[0]):
+                        list_manager.clear_list(selected_list)
+
+                elif(action == manage_list_menu.options[4]):
+                    confirm_menu = ConfirmDeleteListMenu(selected_list)
+                    confirm = confirm_menu.display()
+
+                    if(confirm == confirm_menu.options[0]):
+                        list_manager.delete_list(selected_list)
+                        selected_list = 0
+                        break
+
+listui.list_manager.save(SAVE_PATH)

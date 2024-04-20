@@ -18,9 +18,9 @@ class InvalidNameError(NamingError): pass
 class AlreadyTakenNameError(NamingError): pass
 
 class ListManager:
-    _lists: dict[str, list[str]]
     MIN_NAME_LENGTH = 1
     MAX_NAME_LENGTH = 20
+    _lists: dict[str, list[str]]
 
     def __init__(self) -> None:
         self._lists = {}
@@ -39,11 +39,12 @@ class ListManager:
         if(not name.replace(" ","").replace("-","").replace("_","").replace("'","").isalnum()): # todo
             raise InvalidNameError
 
+    @property
+    def list_names(self) -> list[str]:
+        return list(self._lists.keys())
+
     def has_lists(self) -> bool:
         return len(self._lists) > 0
-
-    def get_list_names(self) -> list[str]:
-        return list(self._lists.keys())
 
     def create_list(self, name: str) -> None:
         self._check_list_name(name)
@@ -62,15 +63,15 @@ class ListManager:
         self._ensure_list_exists(name)
         del self._lists[name]
 
-    def _contains_item(self, list_name: str, item: str) -> bool:
+    def _list_contains_item(self, list_name: str, item: str) -> bool:
         return item in self._lists[list_name]
 
-    def _ensure_item_exists(self, list_name: str, item: str) -> None:
-        if(not self._contains_item(list_name, item)):
+    def _ensure_item_exists_in(self, list_name: str, item: str) -> None:
+        if(not self._list_contains_item(list_name, item)):
             raise ItemNotFoundError
 
     def _check_item(self, item: str, list_name: str) -> None:
-        if(self._contains_item(list_name, item)):
+        if(self._list_contains_item(list_name, item)):
             raise AlreadyTakenNameError
         if(len(item) < self.MIN_NAME_LENGTH):
             raise TooShortNameError
@@ -79,22 +80,18 @@ class ListManager:
         if(item.startswith("'") or item.endswith("'")): # todo
             raise InvalidNameError
 
-    def has_items(self, list_name: str) -> bool:
-        self._ensure_list_exists(list_name)
-        return len(self._lists[list_name]) > 0
-
-    def get_items(self, list_name: str) -> list[str]:
+    def items(self, list_name: str) -> list[str]:
         self._ensure_list_exists(list_name)
         return self._lists[list_name]
 
-    def add_item(self, list_name: str, item: str) -> None:
+    def add_item_to(self, list_name: str, item: str) -> None:
         self._ensure_list_exists(list_name)
         self._check_item(item, list_name)
         self._lists[list_name].append(item)
 
-    def remove_item(self, list_name: str, item: str) -> None:
+    def remove_item_from(self, list_name: str, item: str) -> None:
         self._ensure_list_exists(list_name)
-        self._ensure_item_exists(list_name, item)
+        self._ensure_item_exists_in(list_name, item)
         self._lists[list_name].remove(item)
 
     def load(self, file_path: str) -> None:
